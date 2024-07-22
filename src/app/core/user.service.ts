@@ -9,7 +9,7 @@ export class UserService {
 
   // get the user name from the local storage
   getUserName() {
-    return localStorage.getItem('userName');
+    return localStorage.getItem('userName') ?? '';
   }
 
   isMainUser() {

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { ImageModule } from 'primeng/image';
-import { PhotoService, PickPicture } from './photo.service';
+import { PhotoService } from './photo.service';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { toObservable } from '@angular/core/rxjs-interop';
@@ -11,6 +11,7 @@ import { toSource } from '@state-adapt/rxjs';
 import { statedStream } from 'src/app/util/rxjs-stated-stream';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Router, RouterModule } from '@angular/router';
+import { PickPicture } from 'src/app/core/supabase-api.service';
 
 export type PickPictureState = {
   isLoading: boolean;
@@ -87,6 +88,7 @@ export type PickPictureState = {
         </div>
 
         <div class="flex items-center gap-2">
+          <p-button label="Accueil" [text]="true" [routerLink]="['']" />
           <p-button
             label="Retour"
             [text]="true"

@@ -1,15 +1,13 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { of } from 'rxjs';
-
-export type PickPicture = {
-  id: number;
-  thumbnailImageSrc: string;
-  imageSrc: string;
-  isSelectedByTheUser: boolean;
-};
+import {
+  PickPicture,
+  SupabaseApiService,
+} from 'src/app/core/supabase-api.service';
 
 @Injectable()
 export class PhotoService {
+  private readonly supabaseApiService = inject(SupabaseApiService);
   getData(): PickPicture[] {
     return [
       {
