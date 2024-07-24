@@ -1,12 +1,16 @@
 import { inject } from '@angular/core';
 import { Router, Routes } from '@angular/router';
-import { UserService } from 'src/app/core/user.service';
-import { EmptyLayoutComponent } from 'src/app/layout/empty-layout.component';
+import { EmptyLayoutComponent } from '../../layout/empty-layout.component';
+import { UserService } from '../../core/user.service';
 
 export default <Routes>[
   {
     path: '',
     loadComponent: () => import('./home.page'),
+  },
+  {
+    path: 'leader-board',
+    loadComponent: () => import('./leader-board.page'),
   },
   {
     path: 'pick-a-picture',

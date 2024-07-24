@@ -4,10 +4,9 @@ import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Button } from 'primeng/button';
 import { FloatLabelModule } from 'primeng/floatlabel';
-import { UserService } from 'src/app/core/user.service';
+import { UserService } from '../../core/user.service';
 import { InputTextModule } from 'primeng/inputtext';
 import { MessagesModule } from 'primeng/messages';
-import { SupabaseApiService } from 'src/app/core/supabase-api.service';
 
 // todo image formattage
 // thumbnail 250 largeur /188 hauteur
@@ -62,6 +61,7 @@ import { SupabaseApiService } from 'src/app/core/supabase-api.service';
             class="mt-4"
             label="Voir le classement"
             [rounded]="true"
+            [routerLink]="['/leader-board']"
             severity="help"
           ></p-button>
         </div>
@@ -71,7 +71,6 @@ import { SupabaseApiService } from 'src/app/core/supabase-api.service';
 })
 export default class HomePage {
   private readonly userService = inject(UserService);
-  private readonly supabaseApiService = inject(SupabaseApiService);
 
   protected userNameForm = new FormControl(this.userService.getUserName());
 
@@ -84,8 +83,4 @@ export default class HomePage {
     });
   }
 
-  async ngOnInit() {
-    const result = await this.supabaseApiService.getImageToPicked(1);
-    console.log('result', result.data);
-  }
 }

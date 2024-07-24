@@ -1,17 +1,18 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { ImageModule } from 'primeng/image';
-import { PhotoService } from './photo.service';
+import { MainUserPhotoService, PhotoService, UserPhotoService } from './photo.service';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { filter, forkJoin, map, shareReplay, switchMap, take } from 'rxjs';
+import { distinctUntilChanged, filter, forkJoin, map, shareReplay, skip, switchMap, take } from 'rxjs';
 import { adapt } from '@state-adapt/angular';
 import { toSource } from '@state-adapt/rxjs';
-import { statedStream } from 'src/app/util/rxjs-stated-stream';
+import { statedStream } from '../../util/rxjs-stated-stream';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Router, RouterModule } from '@angular/router';
-import { PickPicture } from 'src/app/core/supabase-api.service';
+import { PickPicture } from '../../core/supabase-api.service';
+import { UserService } from '../../core/user.service';
 
 export type PickPictureState = {
   isLoading: boolean;
@@ -24,6 +25,7 @@ export type PickPictureState = {
 @Component({
   selector: 'app-pick-a-picture-page',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     ImageModule,
@@ -32,7 +34,13 @@ export type PickPictureState = {
     ProgressSpinnerModule,
     RouterModule,
   ],
-  providers: [PhotoService],
+  providers: [{
+    provide: PhotoService,
+    useFactory: () => {
+      const userService = inject(UserService);
+      return userService.isMainUser() ? new MainUserPhotoService() : new UserPhotoService();
+    }
+  }],
   template: `
     <div class="">
       <div
@@ -57,7 +65,7 @@ export type PickPictureState = {
           <div class="shadow-md p-2 rounded">
             <div class="flex flex-col justify-center items-center gap-2">
               <p-image
-                class="flex-1"
+                class="flex-1 max-h-[187px] overflow-hidden"
                 [src]="image.thumbnailImageSrc"
                 [previewImageSrc]="image.imageSrc"
                 width="250"
@@ -111,7 +119,9 @@ export default class PickAPicturePage {
   protected readonly roundNumber$ = computed(
     () => parseInt(this.round()) as 1 | 2 | 3 | 4 | 5
   );
-  private readonly round$ = toObservable(this.roundNumber$);
+  private readonly round$ = toObservable(this.roundNumber$).pipe(
+    distinctUntilChanged(),
+  );
 
   protected readonly imagesFromServer$ = this.round$.pipe(
     switchMap((round) =>
@@ -196,6 +206,7 @@ export default class PickAPicturePage {
               .filter((image) => image.isSelectedByTheUser)
               .map((image) => image.id),
           round: (state) => state.round,
+          images: (state) => state.images,
         },
       },
       sources: {
@@ -214,13 +225,23 @@ export default class PickAPicturePage {
     }
     this.isSubmitting = true;
     forkJoin({
-      imagesSelectedId: this.imagesStore.imagesSelectedId$.pipe(take(1)),
+      // imagesSelectedId: this.imagesStore.imagesSelectedId$.pipe(take(1)),
       round: this.imagesStore.round$.pipe(take(1)),
+      images: this.imagesStore.images$.pipe(take(1)),
+      imagesSelectedId: this.imagesStore.imagesSelectedId$.pipe(take(1)),
     })
       .pipe(
-        switchMap(({ imagesSelectedId, round }) =>
-          this.photoService.submitChoices(imagesSelectedId, round)
-        )
+        switchMap(({ images, round, imagesSelectedId }) =>{
+          debugger;
+          const userScore = images.reduce((acc, image) => {
+            if (image.isSelectedByTheMainUser && image.isSelectedByTheUser) {
+              return acc + 1
+              }
+              return acc
+              }, 0);
+
+          return this.photoService.submitChoices(imagesSelectedId, round, userScore);
+        }),
       )
       .subscribe(({ scoreTarget, userScore, round }) => {
         this.router.navigate([

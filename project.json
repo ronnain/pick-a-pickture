@@ -19,7 +19,13 @@
         "assets": [
           {
             "glob": "**/*",
-            "input": "public"
+            "input": "src/assets/",
+            "output": "/assets/"
+          },
+          {
+            "glob": "favicon.ico",
+            "input": "src/",
+            "output": "/"
           }
         ],
         "styles": [
@@ -63,7 +69,10 @@
           "buildTarget": "pick-a-picture:build:development"
         }
       },
-      "defaultConfiguration": "development"
+      "defaultConfiguration": "development",
+      "options": {
+        "proxyConfig": "./proxy.conf.json"
+      }
     },
     "extract-i18n": {
       "executor": "@angular-devkit/build-angular:extract-i18n",
@@ -81,7 +90,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectName}"],
       "options": {
-        "jestConfig": "jest.config.ts"
+        "jestConfig": "jest.config.app.ts"
       }
     }
   }

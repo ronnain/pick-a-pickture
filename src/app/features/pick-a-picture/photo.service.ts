@@ -1,159 +1,97 @@
 import { inject, Injectable } from '@angular/core';
-import { of } from 'rxjs';
+import { defer, from, map, Observable, of, take } from 'rxjs';
 import {
   PickPicture,
   SupabaseApiService,
-} from 'src/app/core/supabase-api.service';
+} from '../../core/supabase-api.service';
+import { UserService } from '../../core/user.service';
 
 @Injectable()
-export class PhotoService {
+export abstract class PhotoService {
+  abstract getImagesByRound(round: 1 | 2 | 3 | 4 | 5): Observable<PickPicture[]>;
+
+  abstract submitChoices(imagesSelectedId: number[], round: 1 | 2 | 3 | 4 | 5, userScore: number): Observable<{
+    round: number;
+    userScore: number;
+    scoreTarget: number;
+}>;
+}
+
+@Injectable()
+export class UserPhotoService implements PhotoService {
   private readonly supabaseApiService = inject(SupabaseApiService);
-  getData(): PickPicture[] {
-    return [
-      {
-        imageSrc:
-          'https://primefaces.org/cdn/primeng/images/galleria/galleria1.jpg',
-        thumbnailImageSrc:
-          'https://primefaces.org/cdn/primeng/images/galleria/galleria1s.jpg',
-        isSelectedByTheUser: false,
-        id: 1,
-      },
-      {
-        imageSrc:
-          'https://primefaces.org/cdn/primeng/images/galleria/galleria2.jpg',
-        thumbnailImageSrc:
-          'https://primefaces.org/cdn/primeng/images/galleria/galleria2s.jpg',
-        isSelectedByTheUser: false,
-        id: 2,
-      },
-      {
-        imageSrc:
-          'https://primefaces.org/cdn/primeng/images/galleria/galleria3.jpg',
-        thumbnailImageSrc:
-          'https://primefaces.org/cdn/primeng/images/galleria/galleria3s.jpg',
-        isSelectedByTheUser: false,
-        id: 3,
-      },
-      {
-        imageSrc:
-          'https://primefaces.org/cdn/primeng/images/galleria/galleria4.jpg',
-        thumbnailImageSrc:
-          'https://primefaces.org/cdn/primeng/images/galleria/galleria4s.jpg',
-        isSelectedByTheUser: false,
-        id: 4,
-      },
-      {
-        imageSrc:
-          'https://primefaces.org/cdn/primeng/images/galleria/galleria5.jpg',
-        thumbnailImageSrc:
-          'https://primefaces.org/cdn/primeng/images/galleria/galleria5s.jpg',
-        isSelectedByTheUser: false,
-        id: 5,
-      },
-      {
-        imageSrc:
-          'https://primefaces.org/cdn/primeng/images/galleria/galleria6.jpg',
-        thumbnailImageSrc:
-          'https://primefaces.org/cdn/primeng/images/galleria/galleria6s.jpg',
-        isSelectedByTheUser: false,
-        id: 6,
-      },
-      {
-        imageSrc:
-          'https://primefaces.org/cdn/primeng/images/galleria/galleria7.jpg',
-        thumbnailImageSrc:
-          'https://primefaces.org/cdn/primeng/images/galleria/galleria7s.jpg',
-        isSelectedByTheUser: false,
-        id: 7,
-      },
-      {
-        imageSrc:
-          'https://primefaces.org/cdn/primeng/images/galleria/galleria8.jpg',
-        thumbnailImageSrc:
-          'https://primefaces.org/cdn/primeng/images/galleria/galleria8s.jpg',
-        isSelectedByTheUser: false,
-        id: 8,
-      },
-      {
-        imageSrc:
-          'https://primefaces.org/cdn/primeng/images/galleria/galleria9.jpg',
-        thumbnailImageSrc:
-          'https://primefaces.org/cdn/primeng/images/galleria/galleria9s.jpg',
-        isSelectedByTheUser: false,
-        id: 9,
-      },
-      {
-        imageSrc:
-          'https://primefaces.org/cdn/primeng/images/galleria/galleria10.jpg',
-        thumbnailImageSrc:
-          'https://primefaces.org/cdn/primeng/images/galleria/galleria10s.jpg',
-        isSelectedByTheUser: false,
-        id: 10,
-      },
-      {
-        imageSrc:
-          'https://primefaces.org/cdn/primeng/images/galleria/galleria11.jpg',
-        thumbnailImageSrc:
-          'https://primefaces.org/cdn/primeng/images/galleria/galleria11s.jpg',
-        isSelectedByTheUser: false,
-        id: 11,
-      },
-      {
-        imageSrc:
-          'https://primefaces.org/cdn/primeng/images/galleria/galleria12.jpg',
-        thumbnailImageSrc:
-          'https://primefaces.org/cdn/primeng/images/galleria/galleria12s.jpg',
-        isSelectedByTheUser: false,
-        id: 12,
-      },
-      {
-        imageSrc:
-          'https://primefaces.org/cdn/primeng/images/galleria/galleria13.jpg',
-        thumbnailImageSrc:
-          'https://primefaces.org/cdn/primeng/images/galleria/galleria13s.jpg',
-        isSelectedByTheUser: false,
-        id: 13,
-      },
-      {
-        imageSrc:
-          'https://primefaces.org/cdn/primeng/images/galleria/galleria14.jpg',
-        thumbnailImageSrc:
-          'https://primefaces.org/cdn/primeng/images/galleria/galleria14s.jpg',
-        isSelectedByTheUser: false,
-        id: 14,
-      },
-      {
-        imageSrc:
-          'https://primefaces.org/cdn/primeng/images/galleria/galleria15.jpg',
-        thumbnailImageSrc:
-          'https://primefaces.org/cdn/primeng/images/galleria/galleria15s.jpg',
-        isSelectedByTheUser: false,
-        id: 15,
-      },
-      {
-        imageSrc:
-          'https://primefaces.org/cdn/primeng/images/galleria/galleria15.jpg',
-        thumbnailImageSrc:
-          'https://primefaces.org/cdn/primeng/images/galleria/galleria15s.jpg',
-        isSelectedByTheUser: false,
-        id: 16,
-      },
-    ];
-  }
+  private readonly userService = inject(UserService);
 
   getImagesByRound(round: 1 | 2 | 3 | 4 | 5) {
-    return of(this.getData());
+    return from(this.supabaseApiService.getImageToPicked(round)).pipe(
+      take(1),
+      map(result => result.data),
+      map((images) => {
+        if(!images) {
+          return [];
+        }
+        const imagesData = images as any as PickPicture[];
+        return imagesData.map((image) => ({
+          id: image.id,
+          thumbnailImageSrc: `assets/images/${image.id}-sm.webp`,
+          imageSrc: `assets/images/${image.id}-xl.webp`,
+          isSelectedByTheMainUser: image.isSelectedByTheMainUser,
+          isSelectedByTheUser: false
+        }));
+      })
+    );
+  }
+
+  submitChoices(imagesSelectedId: number[], round: 1 | 2 | 3 | 4 | 5, userScore: number) {
+    console.log('imagesSelectedId', imagesSelectedId);
+    // store the user result of the round
+    return from(this.supabaseApiService.storeUserScore(round, this.userService.getUserName(), userScore)).pipe(
+      take(1),
+      map(() => ({
+        round: round,
+        userScore: userScore,
+        scoreTarget: 32/(2**round),
+      }))
+    );
+  }
+}
+
+
+@Injectable()
+export class MainUserPhotoService implements PhotoService {
+  private readonly supabaseApiService = inject(SupabaseApiService);
+
+
+  getImagesByRound(round: 1 | 2 | 3 | 4 | 5) {
+    return from(defer(() => this.supabaseApiService.getImageToPicked(round ))).pipe(
+      take(1),
+      map(result => result.data),
+      map((images) => {
+        if(!images) {
+          return [];
+        }
+        const imagesData = images as any as PickPicture[];
+        return imagesData.map((image) => ({
+          id: image.id,
+          thumbnailImageSrc: `assets/images/${image.id}-sm.webp`,
+          imageSrc: `assets/images/${image.id}-xl.webp`,
+          isSelectedByTheMainUser: image.isSelectedByTheMainUser,
+          isSelectedByTheUser: false
+        }));
+      })
+    );
   }
 
   submitChoices(imagesSelectedId: number[], round: 1 | 2 | 3 | 4 | 5) {
     console.log('imagesSelectedId', imagesSelectedId);
-    // todo get the result of mainUserToCompareWith
-    // store the user result of the round
 
-    return of({
-      round: 1,
-      userScore: 5,
-      scoreTarget: 8,
-    });
+    return from(defer(() => this.supabaseApiService.storeImagePicked(round, imagesSelectedId ))).pipe(
+      take(1),
+      map(() => ({
+        round: round,
+        userScore: 32/(2**round),
+        scoreTarget: 32/(2**round),
+      }))
+    );
   }
 }
