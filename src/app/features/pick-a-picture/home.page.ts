@@ -46,8 +46,8 @@ import { MessagesModule } from 'primeng/messages';
         />
         <div class="flex items-center">
           <p-floatLabel>
-            <input pInputText id="username" [formControl]="userNameForm" />
-            <label for="username">Pseudo</label>
+            <input pInputText id="username" [formControl]="userNameForm" placeholder="RoroTheBest" />
+            <label for="username">Pseudo (original)</label>
           </p-floatLabel>
           <p-button
             label="Jouer"

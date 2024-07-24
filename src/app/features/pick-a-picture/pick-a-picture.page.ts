@@ -232,7 +232,6 @@ export default class PickAPicturePage {
     })
       .pipe(
         switchMap(({ images, round, imagesSelectedId }) =>{
-          debugger;
           const userScore = images.reduce((acc, image) => {
             if (image.isSelectedByTheMainUser && image.isSelectedByTheUser) {
               return acc + 1
