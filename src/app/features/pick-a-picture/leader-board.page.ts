@@ -19,7 +19,7 @@ import { RouterModule } from '@angular/router';
     ],
     template: `
  <div
-        class="h-screen max-h-screen w-screen flex flex-col items-center justify-start overflow-y-auto gap-4 p-4"
+        class="h-page min-h-page max-h-page min-h-page w-screen flex flex-col items-center justify-start overflow-y-auto gap-4 p-4"
       >
       <div class="text-2xl">Classement</div>
 

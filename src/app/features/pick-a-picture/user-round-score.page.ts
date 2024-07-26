@@ -9,7 +9,7 @@ import { ButtonModule } from 'primeng/button';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, ButtonModule, RouterModule],
   template: ` <div
-    class="h-screen w-screen flex flex-col items-center justify-center  py-2"
+    class="h-page min-h-page w-screen flex flex-col items-center justify-center  py-2"
   >
     <h1 class="text-4xl">Round {{ round() }}</h1>
     <h2 class="text-2xl">Score: {{ userScore() }} / {{ scoreTarget() }}</h2>

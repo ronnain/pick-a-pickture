@@ -27,7 +27,7 @@ import { MessagesModule } from 'primeng/messages';
   ],
   template: `
     <div
-      class="h-screen w-screen flex flex-col items-center justify-center  py-2"
+      class="h-page min-h-page w-screen flex flex-col items-center justify-center  py-2"
     >
       <h1 class="text-2xl">Le Trotro GAME !</h1>
 

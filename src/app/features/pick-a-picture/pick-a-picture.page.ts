@@ -44,7 +44,7 @@ export type PickPictureState = {
   template: `
     <div class="">
       <div
-        class="h-screen w-screen flex flex-col items-center justify-center  py-2"
+        class="h-page min-h-page w-screen flex flex-col items-center justify-center  py-2"
       >
         <div class="">
           <h1 class="text-2xl">Devine l'image choisi par Laura</h1>
@@ -52,7 +52,7 @@ export type PickPictureState = {
           ><span> Clique sur l'image pour l'agrandir</span>
         </div>
         @if (isLoading$ | async) {
-        <div class="h-screen w-screen flex items-center justify-center">
+        <div class="h-page min-h-page w-screen flex items-center justify-center">
           <p-progressSpinner></p-progressSpinner>
         </div>
         } @if (isLoaded$ | async) {

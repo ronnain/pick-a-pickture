@@ -11,7 +11,7 @@ import { mergeMap, Subject } from 'rxjs';
     CommonModule,
     ],
     template: `
-    <div class="h-screen w-screen flex items-center justify-center">
+    <div class="h-page min-h-page w-screen flex items-center justify-center">
     <input
               #PicturesInput
               type="file"
