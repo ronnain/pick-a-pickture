@@ -1,5 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
 @import 'primeicons/primeicons.css';
+@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Pacifico&display=swap');
 
 @layer tailwind-base, primeng, tailwind-utilities;
 @layer tailwind-base {
@@ -12,9 +13,21 @@
 }
 
 body {
+  font-family: 'Lora', serif;
+  font-weight: 900;
   background-color: rgb(255, 254, 242);
 }
 
 :root {
   --page-height: 100svh;
+  --page-width: 100vw;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Pacifico', cursive;
+  font-weight: normal;
 }
