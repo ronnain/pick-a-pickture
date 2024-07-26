@@ -1,11 +1,31 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
 import { ImageModule } from 'primeng/image';
-import { MainUserPhotoService, PhotoService, UserPhotoService } from './photo.service';
+import {
+  MainUserPhotoService,
+  PhotoService,
+  UserPhotoService,
+} from './photo.service';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { distinctUntilChanged, filter, forkJoin, map, shareReplay, skip, switchMap, take } from 'rxjs';
+import {
+  distinctUntilChanged,
+  filter,
+  forkJoin,
+  map,
+  shareReplay,
+  skip,
+  switchMap,
+  take,
+} from 'rxjs';
 import { adapt } from '@state-adapt/angular';
 import { toSource } from '@state-adapt/rxjs';
 import { statedStream } from '../../util/rxjs-stated-stream';
@@ -13,6 +33,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Router, RouterModule } from '@angular/router';
 import { PickPicture } from '../../core/supabase-api.service';
 import { UserService } from '../../core/user.service';
+import { RoundIndicatorComponent } from './round-indicator.component'; // Import the new component
 
 export type PickPictureState = {
   isLoading: boolean;
@@ -33,37 +54,46 @@ export type PickPictureState = {
     CardModule,
     ProgressSpinnerModule,
     RouterModule,
+    RoundIndicatorComponent,
   ],
-  providers: [{
-    provide: PhotoService,
-    useFactory: () => {
-      const userService = inject(UserService);
-      return userService.isMainUser() ? new MainUserPhotoService() : new UserPhotoService();
-    }
-  }],
+  providers: [
+    {
+      provide: PhotoService,
+      useFactory: () => {
+        const userService = inject(UserService);
+        return userService.isMainUser()
+          ? new MainUserPhotoService()
+          : new UserPhotoService();
+      },
+    },
+  ],
   template: `
     <div class="">
       <div
-        class="h-screen w-screen flex flex-col items-center justify-center  py-2"
+        class="h-screen w-screen flex flex-col items-center justify-center py-6"
+        id="back-app-picture"
       >
-        <div class="">
-          <h1 class="text-2xl">Devine l'image choisi par Laura</h1>
-          <span>Round {{ round() }} -</span
-          ><span> Clique sur l'image pour l'agrandir</span>
-        </div>
         @if (isLoading$ | async) {
         <div class="h-screen w-screen flex items-center justify-center">
           <p-progressSpinner></p-progressSpinner>
         </div>
         } @if (isLoaded$ | async) {
-
+        <div class="mt-14" *ngIf="((imagesToChoose$ | async)?.length ?? 0) > 0">
+          <span> Clique sur l'image pour l'agrandir</span>
+        </div>
         <div
-          class="flex-1 flex flex-col items-center justify-center gap-2"
+          class="flex flex-col items-center justify-center grow gap-2 pb-10"
           *ngIf="imagesToChoose$ | async as imagesToChoose"
         >
           @for (image of imagesToChoose; track image.id; let index = $index) {
-          <div class="shadow-md p-2 rounded">
-            <div class="flex flex-col justify-center items-center gap-2">
+          <div class="rounded">
+            <div
+              class="flex flex-col justify-center items-center gap-2 border-[10px] border-2 p-component"
+              [ngClass]="{
+                'border-blue': index === 0,
+                'border-orange': index !== 0
+              }"
+            >
               <p-image
                 class="flex-1 max-h-[187px] overflow-hidden"
                 [src]="image.thumbnailImageSrc"
@@ -71,42 +101,94 @@ export type PickPictureState = {
                 width="250"
                 [preview]="true"
               />
-              <p-button
-                [icon]="image.isSelectedByTheUser ? 'pi pi-check' : ''"
-                label="Sélectionner"
-                [rounded]="true"
-                (onClick)="
-                  setImageSelected({
-                    indexImageSelected: index,
-                    imagesToChoose
-                  });
-                  nextStep()
-                "
-              />
             </div>
           </div>
           } @empty {
-          <p-button
-            label="Soumettre mes choix !"
-            [raised]="true"
-            severity="warning"
-            (onClick)="submit()"
-          />
+          <h1 class="text-4xl mb-4">T'es sûr de toi ?</h1>
+          <button
+            (click)="submit()"
+            class="bg-pink rounded-full text-white py-4 px-6 text-xl w-[150px]"
+          >
+            Yes !
+          </button>
           }
+
+          <div *ngIf="imagesToChoose.length > 0" class="flex gap-4 w-full mt-3">
+            <button
+              class="grow w-full font-pacifico bg-blue rounded-full py-3"
+              (click)="
+                setImageSelected({ indexImageSelected: 0, imagesToChoose });
+                nextStep()
+              "
+            >
+              <ng-container
+                *ngIf="
+                  imagesToChoose[0] && imagesToChoose[0].isSelectedByTheUser;
+                  else notSelected0
+                "
+              >
+                <i class="pi pi-check" style="font-size: 1rem"></i>
+              </ng-container>
+              <ng-template #notSelected0>Haut</ng-template>
+            </button>
+            <button
+              id="1"
+              class="grow w-full font-pacifico bg-orange rounded-full py-3"
+              (click)="
+                setImageSelected({ indexImageSelected: 1, imagesToChoose });
+                nextStep()
+              "
+            >
+              <ng-container
+                *ngIf="
+                  imagesToChoose[1] && imagesToChoose[1].isSelectedByTheUser;
+                  else notSelected1
+                "
+              >
+                <i class="pi pi-check" style="font-size: 1rem"></i> Bas
+              </ng-container>
+              <ng-template #notSelected1>Bas</ng-template>
+            </button>
+          </div>
         </div>
 
-        <div class="flex items-center gap-2">
-          <p-button label="Accueil" [text]="true" [routerLink]="['']" />
+        <p-button
+          [routerLink]="['']"
+          icon="pi pi-home"
+          severity="help"
+          class="absolute left-6 top-6"
+          [rounded]="true"
+        />
+        <div class="absolute bottom-6 left-6 flex items-center">
           <p-button
-            label="Retour"
-            [text]="true"
+            icon="pi pi-angle-left"
+            [rounded]="true"
             (onClick)="previousStep()"
             [disabled]="(hasAPreviousStep$ | async) === false"
           />
-          @if(isImageSelectedForThisStep$ | async) {
-          <p-button label="Suivant" [text]="true" (onClick)="nextStep()" />
-          }
+          <ng-container *ngIf="(imagesToChoose$ | async)?.length === 0">
+            <img
+              src="assets/images/fleche.png"
+              alt="fleche"
+              class="w-[80px] ml-2 rotate-180 relative bottom-4"
+            />
+            <span
+              class="text-xl font-pacifico font-normal relative -left-2 bottom-2"
+            >
+              Sinon en arrière !
+            </span>
+          </ng-container>
         </div>
+        @if(isImageSelectedForThisStep$ | async) {
+        <p-button
+          icon="pi pi-angle-right"
+          class="absolute right-8 bottom-6"
+          [rounded]="true"
+          (onClick)="nextStep()"
+        />
+        }
+
+        <app-round-indicator [round]="round()"></app-round-indicator>
         }
       </div>
     </div>
@@ -120,7 +202,7 @@ export default class PickAPicturePage {
     () => parseInt(this.round()) as 1 | 2 | 3 | 4 | 5
   );
   private readonly round$ = toObservable(this.roundNumber$).pipe(
-    distinctUntilChanged(),
+    distinctUntilChanged()
   );
 
   protected readonly imagesFromServer$ = this.round$.pipe(
@@ -220,6 +302,7 @@ export default class PickAPicturePage {
   isSubmitting = false;
   private router = inject(Router);
   protected submit() {
+    console.log('there');
     if (this.isSubmitting) {
       return;
     }
@@ -231,16 +314,20 @@ export default class PickAPicturePage {
       imagesSelectedId: this.imagesStore.imagesSelectedId$.pipe(take(1)),
     })
       .pipe(
-        switchMap(({ images, round, imagesSelectedId }) =>{
+        switchMap(({ images, round, imagesSelectedId }) => {
           const userScore = images.reduce((acc, image) => {
             if (image.isSelectedByTheMainUser && image.isSelectedByTheUser) {
-              return acc + 1
-              }
-              return acc
-              }, 0);
+              return acc + 1;
+            }
+            return acc;
+          }, 0);
 
-          return this.photoService.submitChoices(imagesSelectedId, round, userScore);
-        }),
+          return this.photoService.submitChoices(
+            imagesSelectedId,
+            round,
+            userScore
+          );
+        })
       )
       .subscribe(({ scoreTarget, userScore, round }) => {
         this.router.navigate([
