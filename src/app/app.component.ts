@@ -94,7 +94,7 @@ export class AppComponent implements OnInit {
     const x = e.clientX;
     const y = e.clientY;
 
-    const id = Math.random().toString(36).substring(7);
+    const id = `balloon_${Math.random().toString(36).substring(7)}`;
 
     const baloonIndex = Math.round(Math.random() + 1);
 
