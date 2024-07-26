@@ -12,7 +12,11 @@ import { gsap } from 'gsap';
   imports: [RouterModule],
   selector: 'app-root',
   template: `
-    <div id="back-app" (click)="onClick($event)">
+    <div
+      id="back-app"
+      (click)="onClick($event)"
+      class="h-full w-full overflow-hidden relative"
+    >
       <router-outlet></router-outlet>
       <div
         id="round-transition"
@@ -90,16 +94,23 @@ export class AppComponent implements OnInit {
   }
 
   onClick(e: MouseEvent) {
-    if (!(e.target as HTMLElement)?.id.startsWith('back-app')) return;
+    const target = e.target as HTMLElement;
+    console.log(target);
+    if (target.tagName === 'BUTTON' || target.tagName === 'A') {
+      return; // Exit the function if the target is a button or a link
+    }
     const x = e.clientX;
     const y = e.clientY;
 
+    const backApp = document.getElementById('back-app') as HTMLElement;
+
     const id = `balloon_${Math.random().toString(36).substring(7)}`;
 
-    const baloonIndex = Math.round(Math.random() + 1);
+    const baloonIndex = Math.floor(Math.random() * 7) + 1;
 
+    console.log(baloonIndex, `assets/images/baloon_${baloonIndex}.webp`);
     const img = document.createElement('img');
-    img.src = `assets/images/baloon_${baloonIndex}.png`; // Replace with your image path
+    img.src = `assets/images/baloon_${baloonIndex}.webp`; // Replace with your image path
     img.style.position = 'absolute';
     img.style.left = `${x - 100}px`;
     img.style.top = `${y - 100}px`;
@@ -110,7 +121,7 @@ export class AppComponent implements OnInit {
     img.style.height = '200px'; // Set the desired image size
     img.id = id;
 
-    document.body.appendChild(img);
+    backApp.appendChild(img);
 
     window.requestAnimationFrame(() => {
       window.requestAnimationFrame(() => {
@@ -142,7 +153,7 @@ export class AppComponent implements OnInit {
             duration: 10,
             onComplete: () => {
               tl.kill();
-              document.body.removeChild(img);
+              backApp.removeChild(img);
             },
           });
       });

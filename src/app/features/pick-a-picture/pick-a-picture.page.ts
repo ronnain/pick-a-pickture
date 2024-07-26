@@ -81,7 +81,7 @@ export type PickPictureState = {
         </div>
         } @if (isLoaded$ | async) {
         <div class="mt-14" *ngIf="((imagesToChoose$ | async)?.length ?? 0) > 0">
-          <span> Clique sur l'image pour l'agrandir</span>
+          <span> Cliques sur l'image pour l'agrandir</span>
         </div>
         <div
           class="flex flex-col items-center justify-center grow gap-2 pb-10"

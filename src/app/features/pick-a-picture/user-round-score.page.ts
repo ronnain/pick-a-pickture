@@ -20,7 +20,7 @@ import { ButtonModule } from 'primeng/button';
     class="h-page min-h-page w-screen flex flex-col items-center justify-center  py-2"
   >
     @if(!animationComplete()) {
-    <div class="fixed top-0 left-0 w-full h-full z-50">
+    <div class="fixed top-0 left-0 w-full h-full z-50 pointer-events-none">
       <ng-lottie
         width="100%"
         height="100%"
@@ -34,19 +34,22 @@ import { ButtonModule } from 'primeng/button';
     }
 
     <h1 class="text-4xl">Round {{ round() }}</h1>
-    <h2 class="text-2xl">Score: {{ userScore() }} / {{ scoreTarget() }}</h2>
-    <p-button
+    <h2 class="text-2xl mt-2">
+      Score: {{ userScore() }} / {{ scoreTarget() }}
+    </h2>
+    <a
       *ngIf="hasANextRound()"
-      class="mt-4"
-      label="Niveau suivant"
+      class="mt-4 z-10 bg-orange text-white px-6 py-4 text-2xl rounded-full"
       [routerLink]="['/pick-a-picture', 'round', parseInt(round(), 10) + 1]"
-    ></p-button>
-    <p-button
+    >
+      Niveau suivant
+    </a>
+    <a
       *ngIf="!hasANextRound()"
-      class="mt-4"
-      label="Accueil"
+      class="mt-4 z-10 bg-violet-600 text-white px-6 py-4 text-2xl rounded-full"
       [routerLink]="['']"
-    ></p-button>
+      >Accueil</a
+    >
   </div>`,
 })
 export default class UserRoundScorePage {
