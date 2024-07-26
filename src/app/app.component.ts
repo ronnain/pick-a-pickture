@@ -95,7 +95,6 @@ export class AppComponent implements OnInit {
 
   onClick(e: MouseEvent) {
     const target = e.target as HTMLElement;
-    console.log(target);
     if (target.tagName === 'BUTTON' || target.tagName === 'A') {
       return; // Exit the function if the target is a button or a link
     }
@@ -108,7 +107,6 @@ export class AppComponent implements OnInit {
 
     const baloonIndex = Math.floor(Math.random() * 7) + 1;
 
-    console.log(baloonIndex, `assets/images/baloon_${baloonIndex}.webp`);
     const img = document.createElement('img');
     img.src = `assets/images/baloon_${baloonIndex}.webp`; // Replace with your image path
     img.style.position = 'absolute';
@@ -123,40 +121,45 @@ export class AppComponent implements OnInit {
 
     backApp.appendChild(img);
 
+    const rotationValueOrder = Math.random() > 0.5;
+
+    const rotationValue1 =
+      (Math.random() * (20 - 5) + 5) * (rotationValueOrder ? 1 : -1);
+    const rotationValue2 =
+      (Math.random() * (20 - 5) + 5) * (rotationValueOrder ? -1 : 1);
+
     window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(() => {
-        const tl = gsap.timeline({ yoyo: true, repeat: -1 }).fromTo(
+      const tl = gsap.timeline({ yoyo: true, repeat: -1 }).fromTo(
+        `#${id}`,
+        {
+          rotate: rotationValue1,
+        },
+        {
+          rotate: rotationValue2,
+          duration: 1,
+          ease: 'linear',
+        }
+      );
+
+      gsap
+        .timeline()
+        .fromTo(
           `#${id}`,
           {
-            rotate: -20,
+            scale: 0,
           },
           {
-            rotate: 20,
-            duration: 1,
-            ease: 'linear',
+            scale: 1,
           }
-        );
-
-        gsap
-          .timeline()
-          .fromTo(
-            `#${id}`,
-            {
-              scale: 0,
-            },
-            {
-              scale: 1,
-            }
-          )
-          .to(`#${id}`, {
-            y: -window.innerHeight - 200,
-            duration: 10,
-            onComplete: () => {
-              tl.kill();
-              backApp.removeChild(img);
-            },
-          });
-      });
+        )
+        .to(`#${id}`, {
+          y: -window.innerHeight - 200,
+          duration: 10,
+          onComplete: () => {
+            tl.kill();
+            backApp.removeChild(img);
+          },
+        });
     });
   }
 
